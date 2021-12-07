@@ -46,7 +46,6 @@ library(gridExtra)
 library(knitr)
 library(skimr)
 library(RANN)
-
 ```
 
 # Import Datasets
@@ -60,10 +59,7 @@ We will rename the datasets and remove the old ones.
 movie_gross <- read.csv("zippedData/bom.movie_gross.csv.gz")
 title_akas <- read.csv("zippedData/imdb.title.akas.csv.gz")
 title_basics <- read.csv("zippedData/imdb.title.basics.csv.gz")
-# title_crew <- read.csv("zippedData/imdb.title.crew.csv.gz")
-# title_principals <- read.csv("zippedData/imdb.title.principals.csv.gz")
 title_ratings <- read.csv("zippedData/imdb.title.ratings.csv.gz")
-# movie_info <- read.csv("zippedData/rt.movie_info.tsv.gz")
 movies_budget <- read.csv("zippedData/tn.movie_budgets.csv.gz")
 movies <- read.csv("zippedData/tmdb.movies.csv.gz")
 ```
@@ -588,7 +584,7 @@ As can be seen, the model was very close in predicting the rating for Dirty Gran
 
 Note that the 95% confidence prediction intervals are very wide. This is a reflection of the poor predictive capability of the model (further evidenced by its F-statistic and adjusted R-square values).
 
-## More Prediction ? (I can't do anymore - Hala)
+## More Prediction ? (stopped)
 
 Split into training and validation
 
