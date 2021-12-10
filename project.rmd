@@ -1,8 +1,8 @@
 ---
-title: "CS3072 - Final Project"
+title: "CS3072 - Final Project Code"
 subtitle: "IMDB Data Analysis"
-author: "Hala - Hanin - Dhekra - Huda - Reem"
-date: "12/1/2021"
+author: "Hala Haneya - Dhekra Alkaf - Hanin Balbaid - Reem Salih - Huda Thalib"
+date: "12/10/2021"
 output: pdf_document
 ---
 
@@ -25,38 +25,20 @@ library(RANN)
 
 # Import Datasets
 
-The data was imported using import dataset function in R Studio because we 
-noticed it was much faster than using import as a code.
-
-We will rename the datasets and remove the old ones. 
-
 ```{r}
 movie_gross <- read.csv("zippedData/bom.movie_gross.csv.gz")
 title_akas <- read.csv("zippedData/imdb.title.akas.csv.gz")
 title_basics <- read.csv("zippedData/imdb.title.basics.csv.gz")
 title_ratings <- read.csv("zippedData/imdb.title.ratings.csv.gz")
 movies_budget <- read.csv("zippedData/tn.movie_budgets.csv.gz")
-movies <- read.csv("zippedData/tmdb.movies.csv.gz")
 ```
 
-```{r}
-# rm(bom.movie_gross.csv)
-# rm(imdb.title.akas.csv)
-# rm(imdb.title.basics.csv)
-# rm(imdb.title.crew.csv)
-# rm(imdb.title.principals.csv)
-# rm(imdb.title.ratings.csv)
-# rm(rt.movie_info.tsv)
-# rm(tn.movie_budgets.csv)
-# rm(tmdb.movies.csv)
-```
-
-# Recommendations and Questions 
+# Part 1 - Recommendations and Questions 
 
 ## Question 1: Which studios has the highest profit margin?
 
-We are looking to find the studios whose average profit margin is highest and 
-we will first start by exploring the dataset.
+We are looking to find the studios whose average profit margin is highest and we will first start by exploring the dataset.
+
 ```{r}
 dim(movie_gross)
 ```
@@ -71,8 +53,7 @@ group_by_studio <- movie_gross %>%
 group_by_studio
 
 ```
-Here we select only those studios that have created more than 3 titles, since we 
-have many of studios in our dataset.
+Here we select only those studios that have created more than 3 titles, since we have many of studios in our dataset.
 
 ```{r}
 studio_df <- group_by_studio %>% 
@@ -85,8 +66,7 @@ Removing redundant df to save memory.
 rm(group_by_studio)
 ```
 
-We only want the studios in grouped_by_studio, so we will save the studios in a 
-vector and then filter the data in movie gross according to the required studios.
+We only want the studios in grouped_by_studio, so we will save the studios in a vector and then filter the data in movie gross according to the required studios.
 
 ```{r}
 studios <- studio_df[['studio']]
@@ -146,17 +126,13 @@ profit_by_studio %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 ```
 
-Question 1 Conclusion: According to the mean profit margin, The Orchard (Orch.) 
-has the highest profit margin.
+Question 1 Conclusion: According to the mean profit margin, The Orchard (Orch.) has the highest profit margin.
 
 ## Question 2: What are the most profitable movies and how much should you spend?
 
-To answer this question and provide a recommendation we'll make use of a budgets 
-dataframe called imdb_budgets. Our analysis will require that we use the data to 
-calculate profit and profit margin.
+To answer this question and provide a recommendation we'll make use of a budgets dataframe called imdb_budgets. Our analysis will require that we use the data to calculate profit and profit margin.
 
-We remove commas and dollar signs from budget related columns and turning 
-them numerical.
+We remove commas and dollar signs from budget related columns and turning them numerical.
 
 ```{r}
 movies_budget$production_budget = 
@@ -194,8 +170,10 @@ imdb_budgets %>%
   ggplot(mapping = aes(x = production_budget, y = profit)) +
   geom_point() +
   geom_smooth() +
-  labs(title = "Profit vs Production Budget", x = "Production Budget", y = "Profit") +
+  labs(title = "Profit vs Production Budget", 
+       x = "Production Budget", y = "Profit") +
   scale_y_continuous(labels = comma) +
+  scale_x_continuous(labels = comma) +
   theme_bw()
 
 ```
@@ -212,7 +190,8 @@ imdb_budgets %>%
            fill = "steelblue", color = "black") +
   labs(title = "Top 25 Movies by Profit", x = "Movies", y = "Profit") +
   scale_y_continuous(labels = comma) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+  theme_bw() +
+  coord_flip()
 ```
 Question 2 Conclusion: The most profitable movie is Avatar with a profit of about 3 billion us dollars. It is recommended to attempt to follow the budgets of the most profitable movies.
 
@@ -262,8 +241,7 @@ imdb_genres_budget_rating <- imdb_genres_budget_rating %>%
 ```
 
 ```{r}
-options(scipen=5)
-
+options(scipen=4)
 imdb_genres_budget_rating %>% 
   group_by(genre) %>% 
   summarise(sum_profit = sum(profit)) %>% 
@@ -271,6 +249,7 @@ imdb_genres_budget_rating %>%
   geom_bar(stat = "identity", fill = "#26aeb8", color = "black") +
   labs(title = "Net Profit of each Genre", x = "Genre", y = "Sum Profit") +
   scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) + 
+  scale_y_continuous(labels = comma) +
   theme_bw() +
   coord_flip()
 ```
@@ -301,14 +280,17 @@ class(imdb_genres_budget_rating$release_date)
 ```
 We extract the month number from the date and save it in a new variable.
 ```{r}
-imdb_genres_budget_rating$release_month <- format(imdb_genres_budget_rating$release_date, "%m")
+imdb_genres_budget_rating$release_month <- 
+  format(imdb_genres_budget_rating$release_date, "%m")
 
 ```
 
 ```{r}
 imdb_genres_budget_rating %>% 
   ggplot(mapping = aes(x = release_month, y = profit_margin)) +
-  labs(title = "Profit Margin in each Month", x = "Month", y = "Profit Margin") +
+  labs(title = "Profit Margin in each Month", 
+       x = "Month", 
+       y = "Profit Margin") +
   geom_bar(stat = "identity", fill = "#79b0ff") + 
   theme_bw()
 ```
@@ -316,10 +298,9 @@ Question 4 Conclusion: November and December are months that bring the most prof
 
 ## Question 5: Which actors and directors tend to add the most value?
 
-We are going to take a look at the average net profit across all movies. 
-Then, we want to determine which actors and directors consistently appear in movies where the net profit substantially exceeds the average. We will represent this in a field called Value Above Replacement(VAR). To further simplify this concept; if across all movies the average net profit is 100 dollars and the average net profit of movies from 'Actor: X' is 200 dollars he/she would have a VAR of 2. This number represents X times over the average. To eliminate outliers we will look at actors who appear in 10 or more movies and directors who work in 5 or more.
+We are going to examine the average net profit across all movies. Then, we want to determine which actors and directors consistently appear in movies where the net profit substantially exceeds the average. We represent the actor’s or director's success using a variable called Value Above Replacement (VAR). To further simplify this concept; if across all movies the average net profit is 100 dollars and the average net profit of movies from 'Actor: X' is 200 dollars he/she would have a VAR of 2. This number represents X times over the average. To eliminate outliers, we will look at actors who appear in 10 or more movies and directors who work in 5 or more. 
 
-We'll use the actors_df dataframe, adjust for inflation, and calculate profit as we did in Question 1. Then filter by actors who have starred in 10 or more movies.
+We'll use the actors_df dataframe and calculate profit as we did before.
 
 ```{r}
 actors <- read_csv('tables/Actors_Table.csv')
@@ -331,12 +312,14 @@ We rename the columns for consistency.
 actors <- actors %>% 
   rename(movie = 'Movie', year = 'Year',release_date = 'Release Date', 
          production_budget = 'Production Budget', 
-         domestic_gross = 'Domestic Gross', worldwide_gross = 'Worldwide Gross')
+         domestic_gross = 'Domestic Gross', 
+         worldwide_gross = 'Worldwide Gross')
 
 directors <- directors %>% 
   rename(movie = 'Movie', year = 'Year',release_date = 'Release Date', 
          production_budget = 'Production Budget', 
-         domestic_gross = 'Domestic Gross', worldwide_gross = 'Worldwide Gross')
+         domestic_gross = 'Domestic Gross', 
+         worldwide_gross = 'Worldwide Gross')
 ```
 
 We calculate profit and profit margin like above.
@@ -404,8 +387,7 @@ directors %>%
 ```
 Question 5 Conclusion: According to the above calculation and graphs, actor Robert De Niro is the most valuable actor. Director Steven Spielberg is most valubale director.
 
-## Question 6: What is the relationship between the genres, the net profit and
-the imdb rating?
+## Question 6: What is the relationship between the genres, the net profit and the imdb rating?
 
 We start by grouping by the top 5 genres only. Then, we calculate the sum profit and mean rating in each genre.
 
@@ -425,7 +407,7 @@ imdb_genres_budget_rating %>%
 ```
 Question 6 Conclusion: The plot is interesting. The genres with low sum profit comparatively has the highest ratings. Sci-Fi has the lowest sum profit but has the highest average rating at 6.8.
 
-# Machine Learning
+# Part 2 - Predicting Movie Success
 
 We create a new dataframe for the modeling.
 
@@ -439,7 +421,8 @@ imdb <-
 
 ```{r}
 for_lm <- 
-  imdb_genres_budget_rating %>% inner_join(imdb, by = c("movie" = "primary_title")) %>% 
+  imdb_genres_budget_rating %>% 
+  inner_join(imdb, by = c("movie" = "primary_title")) %>% 
   select(id, movie, year, release_month, genre, averagerating.x, numvotes, 
          runtime_minutes, profit, profit_margin) %>% 
   rename(averageRating = averagerating.x) %>% 
@@ -454,7 +437,7 @@ mean_rating <- round(mean(for_lm$averageRating, na.rm = TRUE), digits = 2)
 
 for_lm %>% 
   ggplot(mapping = aes(x = averageRating)) +
-  geom_histogram(binwidth=0.5, fill="white", color = "black" ) + 
+  geom_histogram(binwidth=0.5, fill="lightblue", color = "black" ) + 
   geom_vline(aes(xintercept = mean_rating),
                  color = 'red', size = 1, linetype = "dashed") +
    annotate("text",                        
@@ -463,22 +446,22 @@ for_lm %>%
            label = paste("Mean = ", mean_rating),
            col = "red",
            size = 6) +
-  labs(title = "IMDB Average Rating")
+  labs(title = "IMDB Average Rating") + 
+  theme_bw()
 
 ```
 The IMDB scores show a nice, mostly normal distribution centered around a mean of 6.6 with somewhat of a left-side skew. Given its distribution the IMDB rating (averageRating) was the chosen response variable.
 
-Since the goal is to predict the popularity of a movie prior to its release, the prediction model uses only variables from the data set that could be known ahead of time. Thus, variables such as DVD release date, number of IMDB votes, profit, etc. were not chosen to be in the model. Variables with large domains, such as studio name, actor/director names, URLs, etc. were excluded as well.
+Since the goal is to predict the popularity of a movie prior to its release, the prediction model uses only variables from the data set that could be known ahead of time. Thus, variables such as release date, number of IMDB votes, profit, etc. were not chosen to be in the model. Variables with large domains, such as studio name, actor/director names, URLs, etc. were excluded as well.
+The variables we chose (Lee, 2020) are:
 
-The variables we chose (based on research) are :
+1- genre
 
-1. genre
-2. runtime_minutes
-3. release_month
+2- Runtime minutes
 
-The release month was included assuming that movies released at certain times of the year may be more popular than others. Release year was discarded as being irrelevant (without time travel capabilities, no future movie will be released in a year that has already passed) and release day was thought to be too granular to be a worthwhile predictor.
+3- Release month
 
-### Linear Model
+The release month was included assuming that movies released at certain times of the year may be more popular than others. Release year was discarded as being irrelevant (no future movie will be released in a year that has already passed) and release day was thought to be too detailed to be a worthwhile predictor.
 
 ```{r}
 model <- lm(formula = averageRating ~ genre + runtime_minutes + release_month, 
@@ -500,115 +483,49 @@ pMod <- fortify(model)
 
 # Create residuals scatter plot.
 p1 <- ggplot(pMod, aes(x=.fitted, y=.resid))+geom_point() +
-      geom_smooth(se=FALSE)+geom_hline(yintercept=0, col="red", linetype="dashed") +
-      xlab("Fitted Values")+ylab("Residuals") +
+      geom_smooth(se=FALSE) + 
+      geom_hline(yintercept=0, col="red", linetype="dashed") +
+      xlab("Fitted Values") +
+      ylab("Residuals") +
       ggtitle("Residual vs Fitted Plot")
 
-# The following is a bunch of extra code to get around ggplot not being able
-# to automatically draw a normal distribution line on a QQ plot.
-# This code comes from a blog post at http://mgimond.github.io/ES218/Week06a.html
-pMod$.qqnorm <- qqnorm(pMod$.stdresid, plot.it=FALSE)$x  
-y <- quantile(pMod$.stdresid, c(0.25, 0.75), na.rm = TRUE) # Find the 1st and 3rd quartiles
-x <- quantile(pMod$.qqnorm, c(0.25, 0.75), na.rm = TRUE)   # Find the 1st and 3rd quartiles
-slope <- diff(y) / diff(x)             # Compute the line slope
-int <- y[1] - slope * x[1]             # Compute the line intercept
-
-# Create residuals QQ plot.
-p2 <- ggplot(pMod, aes(.qqnorm, .stdresid)) +
-      geom_point(na.rm = TRUE) +
-      geom_abline(intercept=int, slope=slope, color="red") +
-      xlab("Theoretical Quantiles")+ylab("Standardized Residuals") +
-      ggtitle("Normal Q-Q Plot")
-
 # Create residuals histogram plot.
-p3 <- ggplot(data=pMod, aes(x=.resid)) + 
+p2 <- ggplot(data=pMod, aes(x=.resid)) + 
       geom_histogram(binwidth=0.5, fill="blue") +
       xlab("Residuals") +
       ggtitle("Distribution of Residuals")
 ```
 
 ```{r}
-grid.arrange(p1, p3, p2, nrow=1, top="Model Diagnostic Plots")
+grid.arrange(p1, p2, nrow=1, top ="Model Diagnostic Plots")
 ```
 
-The model diagnostic plots above show that the model is passable. There is good scatter of the residuals around zero for the range of fitted values (the mean value of the residuals is, in fact, zero). The residuals Q-Q plot and distribution histogram show a pretty normal distribution, and one that mimics the left-hand skew of the original rating scores.
-
+The model diagnostic plots above show that the model is passable. There is good scatter of the residuals around zero for the range of fitted values (the mean value of the residuals is, in fact, zero). The residuals distribution histogram shows a normal distribution, and one that mimics the left-hand skew of the original rating scores.
 Overall, the evidence points toward the final model being valid.
 
 ### Prediction
 
 ```{r}
-# Use the final model to generate rating predictions for Dirty Grandpa released
-# in January 2016 and for Deadpool released in February 2016.
-dataDG <- data.frame(genre="Comedy", runtime_minutes=102, release_month = "01")
-predDG <- predict(model, dataDG, interval="predict")
+# Use the final model to generate rating predictions for Central Intelligence 
+# released in June 2016 and for Hidden Figures released in January 2016.
 
-dataDead <- data.frame(genre="Action", runtime_minutes=108, release_month = "02")
-predDead <- predict(model, dataDead, interval="predict")
+dataCI <- data.frame(genre="Comedy", runtime_minutes=107, release_month = "06")
+predCI <- predict(model, dataCI, interval="predict")
+
+dataHF <- data.frame(genre="Drama", runtime_minutes=127, release_month = "01")
+predHF <- predict(model, dataHF, interval="predict")
 
 # Show prediction results.
-df <- data.frame(t=c("Dirty Grandpa", "Deadpool"),
-                 p=c(sprintf("%2.1f", predDG[1]), 
-                     sprintf("%2.1f", predDead[1])),
-                 i=c(sprintf("%2.1f - %2.1f", predDG[2], predDG[3]), 
-                     sprintf("%2.1f - %2.1f", predDead[2], predDead[3])),
-                 r=c("6.0", "8.1"))
-kable(df, col.names=c("Movie Title", "Predicted Rating", "95% Prediction Interval", "Actual Rating"))
+df <- data.frame(t=c("Central Intelligence", "Hidden Figures"),
+                 p=c(sprintf("%2.1f", predCI[1]), 
+                     sprintf("%2.1f", predHF[1])),
+                 i=c(sprintf("%2.1f - %2.1f", predCI[2], predCI[3]), 
+                     sprintf("%2.1f - %2.1f", predHF[2], predHF[3])),
+                 r=c("6.3", "7.9"))
+kable(df, col.names=c("Movie Title", "Predicted Rating", 
+                      "95% Prediction Interval", "Actual Rating"))
 ```
-As can be seen, the model was very close in predicting the rating for Dirty Grandpa, but significantly off in its prediction for Deadpool; the real rating for which is even outside of the 95% confidence prediction interval (the interval around the predicted rating score within which we are 95% confident the real movie score would fall).
-
-Note that the 95% confidence prediction intervals are very wide. This is a reflection of the poor predictive capability of the model (further evidenced by its F-statistic and adjusted R-square values).
-
-## More Prediction ? (stopped)
-
-Split into training and validation
-
-```{r}
-# Create the training and test datasets
-set.seed(100)
-
-# Step 1: Get row numbers for the training data
-trainRowNumbers <- createDataPartition(for_lm$averageRating, p=0.8, list=FALSE)
-
-# Step 2: Create the training  dataset
-trainData <- for_lm[trainRowNumbers,]
-
-# Step 3: Create the test dataset
-testData <- for_lm[-trainRowNumbers,]
-
-```
-
-### Descriptive Statistics
-
-```{r}
-skimmed <- skim_to_wide(trainData)
-skimmed[, c(1:5, 9:11, 13, 15:16)]
-```
-
-### Handling missing values
-
-```{r}
-# Create the knn imputation model on the training data
-preProcess_missingdata_model <- preProcess(trainData, method='knnImpute')
-preProcess_missingdata_model
-
-# Use the imputation model tro predict the values of missing data points
-trainData <- predict(preProcess_missingdata_model, newdata = trainData)
-anyNA(trainData)
-
-```
-
-# Conclusion
-
-In answer to the research question stated in Part 2, yes, it is possible to predict the popularity of a movie based upon basic movie characteristic data. In this analysis, a valid, parsimonious, multi-variable, linear regression model was created that proved to have some capability for predicting movie popularity as indicated by IMDB movie rating score.
-
-But, there is much room for improvement. As shown in Part 5, the predictive power of the model is limited. Further analysis could pursue the following suggestions for improving the model.
-
-Start with a larger analysis sample to capture more variability in the population data.
-Use a stratified sample reflecting the true proportion of movie genres in the population rather than a simple random sample.
-Create separate models for each movie genre.
-Identify other movie characteristic data to add to the model; identificaton of sequels and their ratings or searching for keywords in the movie title or description, for example.
-
+As the results show, the model was very close in predicting the rating for Central Intelligence, but significantly off in its prediction for Hidden Figures; but the real rating is within the 95% confidence prediction interval (the interval around the predicted rating score within which we are 95% confident the real movie score would fall). Note that the 95% confidence prediction intervals are very wide. This reflects the poor predictive capability of the model.
 
 
 
