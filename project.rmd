@@ -21,6 +21,7 @@ library(gridExtra)
 library(knitr)
 library(skimr)
 library(RANN)
+
 ```
 
 # Import Datasets
@@ -171,9 +172,9 @@ imdb_budgets %>%
   geom_point() +
   geom_smooth() +
   labs(title = "Profit vs Production Budget", 
-       x = "Production Budget", y = "Profit") +
-  scale_y_continuous(labels = comma) +
-  scale_x_continuous(labels = comma) +
+       x = "Production Budget (Millions)", y = "Profit (Billions)") +
+  scale_y_continuous(labels =  number_format(scale = 1 / 1000000000)) +
+  scale_x_continuous(labels =  dollar_format(scale = 1 / 1000000)) +
   theme_bw()
 
 ```
@@ -188,8 +189,8 @@ imdb_budgets %>%
   ggplot(mapping = aes(x = reorder(movie, profit), y = profit)) +
   geom_bar(position = "dodge", stat = "identity",
            fill = "steelblue", color = "black") +
-  labs(title = "Top 25 Movies by Profit", x = "Movies", y = "Profit") +
-  scale_y_continuous(labels = comma) +
+  labs(title = "Top 25 Movies by Profit", x = "Movies", y = "Profit (Billions)") +
+  scale_y_continuous(labels = number_format(scale = 1 / 1000000000)) +
   theme_bw() +
   coord_flip()
 ```
@@ -247,9 +248,9 @@ imdb_genres_budget_rating %>%
   summarise(sum_profit = sum(profit)) %>% 
   ggplot(mapping = aes(x = reorder(genre, sum_profit), y = sum_profit)) +
   geom_bar(stat = "identity", fill = "#26aeb8", color = "black") +
-  labs(title = "Net Profit of each Genre", x = "Genre", y = "Sum Profit") +
+  labs(title = "Net Profit of each Genre", x = "Genre", y = "Sum Profit (Billions)") +
   scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) + 
-  scale_y_continuous(labels = comma) +
+  scale_y_continuous(labels = dollar_format(scale = 1 / 1000000000)) +
   theme_bw() +
   coord_flip()
 ```
@@ -260,7 +261,7 @@ imdb_genres_budget_rating %>%
   summarise(sum_profit_margin = sum(profit_margin)) %>% 
   ggplot(mapping = aes(x = reorder(genre, sum_profit_margin), y = sum_profit_margin)) +
   geom_bar(stat = "identity", fill = "#26aeb8", color = "black") +
-  labs(title = "Profit Margin of each Genre", x = "Genre", y = "Profit Margin") +
+  labs(title = "Profit Margin of each Genre", x = "Genre", y = "Profit Margin (%)") +
   scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) + 
   theme_bw() +
   coord_flip()
@@ -290,7 +291,7 @@ imdb_genres_budget_rating %>%
   ggplot(mapping = aes(x = release_month, y = profit_margin)) +
   labs(title = "Profit Margin in each Month", 
        x = "Month", 
-       y = "Profit Margin") +
+       y = "Profit Margin (%)") +
   geom_bar(stat = "identity", fill = "#79b0ff") + 
   theme_bw()
 ```
@@ -389,7 +390,7 @@ Question 5 Conclusion: According to the above calculation and graphs, actor Robe
 
 ## Question 6: What is the relationship between the genres, the net profit and the imdb rating?
 
-We start by grouping by the top 5 genres only. Then, we calculate the sum profit and mean rating in each genre.
+We start by grouping by the top 5 genres by profit only. Then, we calculate the sum profit and mean rating in each genre.
 
 ```{r}
 options(scipen=5)
@@ -405,7 +406,21 @@ imdb_genres_budget_rating %>%
   scale_y_continuous(labels = comma) +
   theme_bw()
 ```
-Question 6 Conclusion: The plot is interesting. The genres with low sum profit comparatively has the highest ratings. Sci-Fi has the lowest sum profit but has the highest average rating at 6.8.
+We then group by the top 5 genres by profit margin only. Then, we calculate the sum profit margin and mean rating in each genre.
+```{r}
+options(scipen=5)
+imdb_genres_budget_rating %>%
+  filter(genre %in% c('Action', 'Adventure','Comedy', 'Drama', 'Thriller'),
+         !is.na(averagerating)) %>% 
+  group_by(genre) %>% 
+  summarise(sum_profit_margin = sum(profit_margin), average_rating = mean(averagerating)) %>% 
+  ggplot(mapping = aes(x = genre, y = sum_profit_margin, fill = average_rating)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.5) +
+  labs(title="Sum Profit Margin and Average Rating per Genre", fill = "Average Rating",
+       x = "Genre", y = "Sum Profit Margin (%)") +
+  theme_bw()
+```
+Question 6 Conclusion: The first plot is interesting. The genres with low sum profit comparatively has the highest ratings. Sci-Fi has the lowest sum profit but has the highest average rating at 6.8. Whereas, in the second plot of the sum profit margin, it acts like expected with the genres with the highest profit margin have the highest ratings.
 
 # Part 2 - Predicting Movie Success
 
