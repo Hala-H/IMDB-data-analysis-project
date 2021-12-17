@@ -402,8 +402,8 @@ imdb_genres_budget_rating %>%
   ggplot(mapping = aes(x = genre, y = sum_profit, fill = average_rating)) +
   geom_bar(stat = "identity", position = "dodge", width = 0.5) +
   labs(title="Sum Profit and Average Rating per Genre", fill = "Average Rating",
-       x = "Genre", y = "Sum Profit") +
-  scale_y_continuous(labels = comma) +
+       x = "Genre", y = "Sum Profit (Billions)") +
+  scale_y_continuous(labels = dollar_format(scale = 1/1000000000)) +
   theme_bw()
 ```
 We then group by the top 5 genres by profit margin only. Then, we calculate the sum profit margin and mean rating in each genre.
